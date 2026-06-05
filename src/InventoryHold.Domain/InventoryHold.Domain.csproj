@@ -8,6 +8,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- Pure Microsoft abstractions — no driver/SDK types, safe in Domain (§3) -->
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\InventoryHold.Contracts\InventoryHold.Contracts.csproj" />
   </ItemGroup>
 
