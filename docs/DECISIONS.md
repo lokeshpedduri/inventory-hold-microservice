@@ -1,7 +1,9 @@
 # Architecture Decision Records
 
-Lightweight ADRs. Each captures a decision, the context, the alternatives, and the consequence —
-so every choice in this repo can be explained and defended.
+Short notes on the decisions that shaped this repo: what I picked, why, what I passed on, and
+what it cost me. Mostly so future-me remembers the reasoning instead of guessing.
+
+_The calls here are mine. — Lokesh Pedduri_
 
 ---
 
@@ -45,7 +47,7 @@ would add ceremony without benefit.
 
 ## ADR-004: DDD ports-and-adapters layering
 **Status:** Accepted
-**Context:** Maintainability and testability are explicitly graded.
+**Context:** I wanted this to stay maintainable and genuinely easy to unit-test.
 **Decision:** Domain defines ports (repository/cache/bus interfaces) and holds all business logic;
 Infrastructure provides adapters. Dependencies point inward; Domain references no infra SDKs.
 **Consequences:** Unit tests mock ports and need no live infra. Infra is swappable. Clear review

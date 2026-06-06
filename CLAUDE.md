@@ -12,9 +12,9 @@ An **Inventory Hold Microservice**. When a customer begins checkout, items are p
 temporary *hold* so they cannot be sold to another customer. Holds expire after a configurable
 duration (default 15 minutes). This is the classic e-commerce reservation pattern.
 
-This is an assignment for a Senior Full Stack role. It is graded on **architecture quality,
-code quality, testing, and AI-steering** — not just whether it runs. Optimize for a codebase
-that is modular, readable, maintainable, and *explainable in an interview*.
+This is a hands-on weekend project to work a realistic e-commerce stack end to end. I'm
+optimizing for a codebase that's modular, readable, and maintainable — the kind of thing I'd
+be happy to come back to months later and still understand.
 
 ## 2. Tech stack (do not deviate without an ADR)
 
@@ -30,8 +30,8 @@ that is modular, readable, maintainable, and *explainable in an interview*.
 | Frontend       | **React + TypeScript + Vite**   | State via **TanStack Query** (server-state). |
 | Container      | **Docker + docker-compose**     | One command: `docker-compose up --build`. |
 
-**Rejected alternatives (be ready to explain):**
-- *Postgres*: JD mentions it, assignment does not require it. Out of scope; noted in ARCHITECTURE.md only.
+**Rejected alternatives (and why):**
+- *Postgres*: not needed for what this project does. Out of scope; noted in ARCHITECTURE.md only.
 - *Zustand / Redux on the frontend*: this app is ~all server-state; TanStack Query gives
   caching + auto-invalidation-after-mutation for free. Adding a client store would be over-engineering.
 - *Destructive MongoDB TTL index for expiry*: rejected — see §5.
@@ -65,7 +65,7 @@ sellable count (already net of active holds).
 - `Status` enum: `Active | Released | Expired`. **Status is the source of truth for lifecycle.**
 - Holds are NEVER hard-deleted on expiry/release. They transition status. (Auditability + idempotency.)
 
-## 5. Hold expiry strategy (KEY DESIGN DECISION — expect to defend this)
+## 5. Hold expiry strategy (the key design decision)
 
 We use a **hybrid** approach, NOT a destructive TTL index:
 
@@ -80,7 +80,7 @@ We use a **hybrid** approach, NOT a destructive TTL index:
 or return a proper expired state on GET. The requirements need both. A TTL index could only ever
 be a *cleanup* mechanism for already-terminal records — mention as future work, do not rely on it.
 
-## 6. Concurrency — the centerpiece
+## 6. Concurrency (the core problem)
 
 Stock decrement and restore MUST be race-safe via a **single conditional atomic operation**:
 

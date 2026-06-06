@@ -1,8 +1,10 @@
 # Inventory Hold Microservice
 
-An e-commerce inventory reservation service. When a customer begins checkout, items are placed on a temporary **hold** so they cannot be sold to another customer. Holds expire after a configurable duration (default 15 minutes) and are released automatically.
+An e-commerce inventory reservation service. When a customer starts checkout, items go on a temporary **hold** so nobody else can buy them. Holds expire after a configurable window (15 minutes by default) and release themselves.
 
-Built as a Senior Full Stack assignment — graded on architecture quality, code quality, testing, and AI-steering. See [`CLAUDE.md`](CLAUDE.md) for the binding spec and [`docs/DECISIONS.md`](docs/DECISIONS.md) for the ADRs.
+A weekend project I built to get hands-on with a full reservation stack: .NET 10, MongoDB, Redis, RabbitMQ, and a React frontend. The design rules I set for myself live in [`CLAUDE.md`](CLAUDE.md), and the reasoning behind the bigger calls is in [`docs/DECISIONS.md`](docs/DECISIONS.md).
+
+Built by Lokesh Pedduri. If you want the story of how I put it together, including the AI workflow and the bugs I had to hunt down, it's in [`AI-USAGE.md`](AI-USAGE.md).
 
 ---
 
