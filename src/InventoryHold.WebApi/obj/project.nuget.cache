@@ -1,0 +1,55 @@
+{
+  "version": 2,
+  "dgSpecHash": "9lJarMnGD68=",
+  "success": false,
+  "projectFilePath": "/Users/lokeshpedduri/loki_dev_parent/inventory-hold-microservice/src/InventoryHold.WebApi/InventoryHold.WebApi.csproj",
+  "expectedPackageFiles": [
+    "/Users/lokeshpedduri/.nuget/packages/dnsclient/1.6.1/dnsclient.1.6.1.nupkg.sha512",
+    "/Users/lokeshpedduri/.nuget/packages/microsoft.aspnetcore.openapi/10.0.0/microsoft.aspnetcore.openapi.10.0.0.nupkg.sha512",
+    "/Users/lokeshpedduri/.nuget/packages/microsoft.openapi/2.0.0/microsoft.openapi.2.0.0.nupkg.sha512",
+    "/Users/lokeshpedduri/.nuget/packages/mongodb.bson/3.1.0/mongodb.bson.3.1.0.nupkg.sha512",
+    "/Users/lokeshpedduri/.nuget/packages/mongodb.driver/3.1.0/mongodb.driver.3.1.0.nupkg.sha512",
+    "/Users/lokeshpedduri/.nuget/packages/pipelines.sockets.unofficial/2.2.8/pipelines.sockets.unofficial.2.2.8.nupkg.sha512",
+    "/Users/lokeshpedduri/.nuget/packages/rabbitmq.client/7.1.2/rabbitmq.client.7.1.2.nupkg.sha512",
+    "/Users/lokeshpedduri/.nuget/packages/scalar.aspnetcore/2.6.0/scalar.aspnetcore.2.6.0.nupkg.sha512",
+    "/Users/lokeshpedduri/.nuget/packages/sharpcompress/0.30.1/sharpcompress.0.30.1.nupkg.sha512",
+    "/Users/lokeshpedduri/.nuget/packages/snappier/1.0.0/snappier.1.0.0.nupkg.sha512",
+    "/Users/lokeshpedduri/.nuget/packages/stackexchange.redis/2.8.16/stackexchange.redis.2.8.16.nupkg.sha512",
+    "/Users/lokeshpedduri/.nuget/packages/zstdsharp.port/0.7.3/zstdsharp.port.0.7.3.nupkg.sha512"
+  ],
+  "logs": [
+    {
+      "code": "NU1603",
+      "level": "Error",
+      "message": "Warning As Error: InventoryHold.WebApi depends on Scalar.AspNetCore (>= 2.5.8) but Scalar.AspNetCore 2.5.8 was not found. Scalar.AspNetCore 2.6.0 was resolved instead.",
+      "projectPath": "/Users/lokeshpedduri/loki_dev_parent/inventory-hold-microservice/src/InventoryHold.WebApi/InventoryHold.WebApi.csproj",
+      "filePath": "/Users/lokeshpedduri/loki_dev_parent/inventory-hold-microservice/src/InventoryHold.WebApi/InventoryHold.WebApi.csproj",
+      "libraryId": "Scalar.AspNetCore",
+      "targetGraphs": [
+        "net10.0"
+      ]
+    },
+    {
+      "code": "NU1902",
+      "level": "Error",
+      "message": "Warning As Error: Package 'SharpCompress' 0.30.1 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-6c8g-7p36-r338",
+      "projectPath": "/Users/lokeshpedduri/loki_dev_parent/inventory-hold-microservice/src/InventoryHold.WebApi/InventoryHold.WebApi.csproj",
+      "filePath": "/Users/lokeshpedduri/loki_dev_parent/inventory-hold-microservice/src/InventoryHold.WebApi/InventoryHold.WebApi.csproj",
+      "libraryId": "SharpCompress",
+      "targetGraphs": [
+        "net10.0"
+      ]
+    },
+    {
+      "code": "NU1903",
+      "level": "Error",
+      "message": "Warning As Error: Package 'Snappier' 1.0.0 has a known high severity vulnerability, https://github.com/advisories/GHSA-pggp-6c3x-2xmx",
+      "projectPath": "/Users/lokeshpedduri/loki_dev_parent/inventory-hold-microservice/src/InventoryHold.WebApi/InventoryHold.WebApi.csproj",
+      "filePath": "/Users/lokeshpedduri/loki_dev_parent/inventory-hold-microservice/src/InventoryHold.WebApi/InventoryHold.WebApi.csproj",
+      "libraryId": "Snappier",
+      "targetGraphs": [
+        "net10.0"
+      ]
+    }
+  ]
+}

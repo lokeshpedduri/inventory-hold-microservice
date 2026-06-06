@@ -1,0 +1,71 @@
+version: "3.9"
+
+services:
+
+  # ── API ──────────────────────────────────────────────────────────────────────
+  api:
+    build:
+      context: .
+      dockerfile: src/InventoryHold.WebApi/Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      # All connection strings injected here — nothing hardcoded in appsettings (§11).
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:8080
+      Mongo__ConnectionString: mongodb://mongo:27017
+      Redis__ConnectionString: redis:6379
+      RabbitMq__Host: rabbitmq
+      RabbitMq__Username: guest
+      RabbitMq__Password: guest
+      Hold__ExpiryDuration: "00:15:00"
+      ExpiryWorker__SweepInterval: "00:01:00"
+    depends_on:
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    restart: on-failure
+
+  # ── MongoDB ───────────────────────────────────────────────────────────────────
+  mongo:
+    image: mongo:8
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  # ── Redis ─────────────────────────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── RabbitMQ ──────────────────────────────────────────────────────────────────
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    ports:
+      - "5672:5672"    # AMQP
+      - "15672:15672"  # Management UI (guest/guest)
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+volumes:
+  mongo_data:
