@@ -155,7 +155,7 @@ export function HoldsList() {
       </div>
 
       {error && <div className="mt-1"><ErrorBanner error={error} /></div>}
-      {releaseError && <div className="mt-1"><ErrorBanner error={releaseError} /></div>}
+      {releaseError != null && <div className="mt-1"><ErrorBanner error={releaseError} /></div>}
 
       {isLoading && (
         <div className="holds-list">

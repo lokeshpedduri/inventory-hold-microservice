@@ -27,7 +27,9 @@ internal sealed class RedisCacheAdapter : ICache
         if (value.IsNullOrEmpty)
             return null;
 
-        return JsonSerializer.Deserialize<T>(value!);
+        // WHY: explicit string cast — RedisValue converts implicitly to both string
+        // and ReadOnlySpan<byte>, which makes the Deserialize<T> overload ambiguous.
+        return JsonSerializer.Deserialize<T>(value.ToString());
     }
 
     /// <inheritdoc/>
