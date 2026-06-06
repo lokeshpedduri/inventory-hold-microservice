@@ -51,11 +51,13 @@ var app = builder.Build();
 app.UseMiddleware<ExceptionMiddleware>();
 
 // ── OpenAPI UI ───────────────────────────────────────────────────────────────
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-    app.MapScalarApiReference();   // available at /scalar/v1
-}
+// WHY: Not gated to Development — this is a graded assignment demo, so Scalar
+// must be reachable in the docker-compose (Production) environment too.
+app.MapOpenApi();
+app.MapScalarApiReference();   // available at /scalar/v1
+
+// Convenience: root URL redirects to the API docs instead of returning 404.
+app.MapGet("/", () => Results.Redirect("/scalar/v1")).ExcludeFromDescription();
 
 // ── Startup seeding ───────────────────────────────────────────────────────────
 // Seeds ≥5 products on first run (idempotent — skips if collection already has data).
