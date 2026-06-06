@@ -35,9 +35,10 @@ FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 WORKDIR /app
 
 # Run as a non-root user to reduce blast radius of any container escape.
-# Debian-based images ship `adduser`/`addgroup` from the adduser package.
-RUN addgroup --system appgroup \
- && adduser  --system --ingroup appgroup --no-create-home appuser
+# WHY: aspnet:10.0 is Debian 12 (Bookworm) which ships shadow-utils, not BusyBox.
+#      Use groupadd/useradd (shadow) instead of addgroup/adduser (BusyBox/Alpine).
+RUN groupadd --system appgroup \
+ && useradd  --system --gid appgroup --no-create-home appuser
 
 COPY --from=build --chown=appuser:appgroup /app/publish .
 
