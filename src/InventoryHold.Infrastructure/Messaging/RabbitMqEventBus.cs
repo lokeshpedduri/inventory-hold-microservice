@@ -19,7 +19,12 @@ namespace InventoryHold.Infrastructure.Messaging;
 /// so no concurrent access occurs on a single request. For high-throughput scenarios a
 /// channel pool would be appropriate; out of scope for this assignment.
 /// </remarks>
-internal sealed class RabbitMqEventBus : IEventBus, IAsyncDisposable
+// WHY not IAsyncDisposable: IChannel is registered as a Singleton and owns its own
+// lifetime. RabbitMqEventBus is Scoped — if it disposed the channel on scope teardown
+// (i.e. end of every request), the channel would be closed after the first request
+// and all subsequent publishes would fail. The host disposes the Singleton IChannel
+// on application shutdown via the DI container.
+internal sealed class RabbitMqEventBus : IEventBus
 {
     private readonly IChannel _channel;
     private readonly string _exchangeName;
@@ -69,10 +74,4 @@ internal sealed class RabbitMqEventBus : IEventBus, IAsyncDisposable
             _exchangeName, routingKey);
     }
 
-    /// <inheritdoc/>
-    public async ValueTask DisposeAsync()
-    {
-        await _channel.CloseAsync();
-        _channel.Dispose();
-    }
 }

@@ -1,5 +1,6 @@
 using InventoryHold.Contracts;
 using InventoryHold.Contracts.Events;
+using InventoryHold.Contracts.Responses;
 using InventoryHold.Domain.Abstractions;
 using InventoryHold.Domain.Entities;
 using Microsoft.Extensions.Logging;
@@ -244,21 +245,35 @@ public sealed class HoldService
     /// <summary>
     /// Returns all inventory items, consulting the cache first (cache-aside).
     /// </summary>
+    /// <remarks>
+    /// WHY we cache <see cref="InventoryItemResponse"/> records rather than domain
+    /// <see cref="InventoryItem"/> entities: <c>System.Text.Json</c> cannot round-trip
+    /// entities that have <c>private set</c> properties and no parameterless constructor.
+    /// <see cref="InventoryItemResponse"/> is a plain <c>record</c> — fully serialisable.
+    /// The mapping from entity → response happens once (on cache miss) and the response
+    /// shape is stable, so this is safe and efficient.
+    /// </remarks>
     public async Task<IReadOnlyList<InventoryItem>> GetInventoryAsync(CancellationToken cancellationToken = default)
     {
-        var cached = await _cache.GetAsync<List<InventoryItem>>(InventoryCacheKey, cancellationToken);
+        // Cache stores the serialisable response DTO, not the domain entity.
+        var cached = await _cache.GetAsync<List<InventoryItemResponse>>(InventoryCacheKey, cancellationToken);
         if (cached is not null)
-            return cached;
+        {
+            // Re-hydrate back to domain entities for consistency with the return type.
+            return cached.Select(r => new InventoryItem(r.ProductId, r.Name, r.AvailableQuantity)).ToList();
+        }
 
         var items = await _inventoryRepository.GetAllAsync(cancellationToken);
-        var list = items.ToList();
+        var responses = items
+            .Select(i => new InventoryItemResponse(i.ProductId, i.Name, i.AvailableQuantity))
+            .ToList();
 
         // WHY: cache TTL is a safety net in case an invalidation is missed (e.g.
         // process crash between write and invalidate). The primary consistency
         // mechanism is explicit InvalidateAsync after every mutation (§9).
-        await _cache.SetAsync(InventoryCacheKey, list, TimeSpan.FromSeconds(30), cancellationToken);
+        await _cache.SetAsync(InventoryCacheKey, responses, TimeSpan.FromSeconds(30), cancellationToken);
 
-        return list;
+        return items;
     }
 
     // Restores stock for every item in `deducted`. Called on partial hold failure

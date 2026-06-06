@@ -1,4 +1,5 @@
 using InventoryHold.Contracts;
+using InventoryHold.Contracts.Responses;
 using InventoryHold.Domain.Services;
 using Moq;
 using Xunit;
@@ -175,25 +176,30 @@ public sealed class HoldServiceLifecycleTests
     public async Task GetInventoryAsync_CacheHit_ReturnsCachedDataWithoutHittingRepository()
     {
         // Arrange
+        // WHY List<InventoryItemResponse>: HoldService caches the serialisable DTO, not the
+        // domain entity, because System.Text.Json cannot round-trip InventoryItem (private
+        // setters, no parameterless ctor). The cache stores responses; on a hit the service
+        // re-hydrates them back into domain entities before returning.
         var fx = new HoldServiceFixture();
-        var cachedItems = new List<InventoryHold.Domain.Entities.InventoryItem>
+        var cachedResponses = new List<InventoryItemResponse>
         {
             new("prod-001", "Headphones", 42),
         };
 
         fx.Cache
-            .Setup(c => c.GetAsync<List<InventoryHold.Domain.Entities.InventoryItem>>(
+            .Setup(c => c.GetAsync<List<InventoryItemResponse>>(
                 HoldService.InventoryCacheKey, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(cachedItems);
+            .ReturnsAsync(cachedResponses);
 
         var sut = fx.BuildService();
 
         // Act
         var result = await sut.GetInventoryAsync();
 
-        // Assert: returned the cached data
+        // Assert: returned the re-hydrated domain entity from cached data
         Assert.Single(result);
         Assert.Equal("prod-001", result[0].ProductId);
+        Assert.Equal(42, result[0].AvailableQuantity);
 
         // Repository must NOT have been called — cache hit should short-circuit
         fx.InventoryRepo.Verify(
