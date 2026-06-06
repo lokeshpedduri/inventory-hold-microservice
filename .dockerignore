@@ -1,10 +1,29 @@
-**/.git
-**/.gitignore
-**/obj
-**/bin
-**/.vs
-**/.vscode
-**/node_modules
-frontend/node_modules
-frontend/dist
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Build outputs — excluded so layer-cached restore is not invalidated by local builds
+**/bin/
+**/obj/
+
+# IDE and OS
+.vs/
+.vscode/
+.idea/
 **/*.user
+**/*.suo
+.DS_Store
+Thumbs.db
+
+# Docs — not needed inside the image
+*.md
+docs/
+AI-USAGE.md
+CLAUDE.md
+
+# Frontend (built separately)
+frontend/
+
+# Test project — not needed in the production image
+src/InventoryHold.UnitTests/

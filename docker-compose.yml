@@ -1,8 +1,11 @@
 version: "3.9"
 
+# One-command startup: docker-compose up --build
+# Brings up: API (8080), MongoDB (27017), Redis (6379), RabbitMQ (5672 + management 15672)
+
 services:
 
-  # ── API ──────────────────────────────────────────────────────────────────────
+  # ── API ────────────────────────────────────────────────────────────────────────
   api:
     build:
       context: .
@@ -10,16 +13,33 @@ services:
     ports:
       - "8080:8080"
     environment:
-      # All connection strings injected here — nothing hardcoded in appsettings (§11).
+      # Runtime environment
       ASPNETCORE_ENVIRONMENT: Production
       ASPNETCORE_URLS: http://+:8080
+
+      # MongoDB — service name 'mongo' resolves inside the compose network
       Mongo__ConnectionString: mongodb://mongo:27017
+      Mongo__DatabaseName: inventory_hold
+      Mongo__HoldsCollection: holds
+      Mongo__InventoryCollection: inventory
+
+      # Redis — service name 'redis' resolves inside the compose network
       Redis__ConnectionString: redis:6379
+
+      # RabbitMQ — service name 'rabbitmq' resolves inside the compose network
       RabbitMq__Host: rabbitmq
+      RabbitMq__Port: 5672
+      RabbitMq__VirtualHost: /
       RabbitMq__Username: guest
       RabbitMq__Password: guest
+      RabbitMq__ExchangeName: inventory.holds
+
+      # Hold lifecycle tunables
       Hold__ExpiryDuration: "00:15:00"
+
+      # Expiry worker sweep interval
       ExpiryWorker__SweepInterval: "00:01:00"
+
     depends_on:
       mongo:
         condition: service_healthy
@@ -27,9 +47,12 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
+
+    # Restart on failure handles the window between a dependency passing its health
+    # check and actually accepting connections (especially RabbitMQ AMQP port).
     restart: on-failure
 
-  # ── MongoDB ───────────────────────────────────────────────────────────────────
+  # ── MongoDB ────────────────────────────────────────────────────────────────────
   mongo:
     image: mongo:8
     ports:
@@ -43,24 +66,28 @@ services:
       retries: 5
       start_period: 20s
 
-  # ── Redis ─────────────────────────────────────────────────────────────────────
+  # ── Redis ──────────────────────────────────────────────────────────────────────
   redis:
     image: redis:7-alpine
     ports:
       - "6379:6379"
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
+      interval: 5s
+      timeout: 3s
       retries: 5
+      start_period: 5s
 
-  # ── RabbitMQ ──────────────────────────────────────────────────────────────────
+  # ── RabbitMQ ───────────────────────────────────────────────────────────────────
   rabbitmq:
     image: rabbitmq:3-management-alpine
     ports:
-      - "5672:5672"    # AMQP
-      - "15672:15672"  # Management UI (guest/guest)
+      - "5672:5672"     # AMQP — used by the API
+      - "15672:15672"   # Management UI — http://localhost:15672  (guest / guest)
     healthcheck:
+      # rabbitmq-diagnostics ping verifies the broker daemon is responsive.
+      # The API uses restart: on-failure as an additional safety net for the window
+      # between the broker passing this check and the AMQP port accepting connections.
       test: ["CMD", "rabbitmq-diagnostics", "ping"]
       interval: 10s
       timeout: 5s
@@ -69,3 +96,4 @@ services:
 
 volumes:
   mongo_data:
+    # Named volume keeps MongoDB data across `docker-compose down` (without -v).
