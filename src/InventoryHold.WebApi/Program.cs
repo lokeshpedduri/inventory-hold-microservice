@@ -10,7 +10,14 @@ var builder = WebApplication.CreateBuilder(args);
 // ── Controllers + Problem Details ────────────────────────────────────────────
 // Problem Details is the default error format for all controller validation errors.
 // Domain exceptions are mapped in ExceptionMiddleware (RFC 7807, §7).
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(opts =>
+    {
+        // WHY: serialize enums as strings ("Active" not 0) so the TypeScript
+        // frontend can compare status === 'Active' without a numeric mapping.
+        opts.JsonSerializerOptions.Converters.Add(
+            new System.Text.Json.Serialization.JsonStringEnumConverter());
+    });
 builder.Services.AddProblemDetails();
 
 // ── OpenAPI / Scalar ─────────────────────────────────────────────────────────
