@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api, queryKeys } from '../api/client';
 import type { Hold } from '../api/types';
 import { StatusBadge } from './shared/StatusBadge';
-import { Countdown } from './shared/Countdown';
+import { Countdown, useCountdown } from './shared/Countdown';
 import { Spinner } from './shared/Spinner';
 import { ErrorBanner } from './shared/ErrorBanner';
 
@@ -52,15 +52,26 @@ interface HoldCardProps {
 }
 
 function HoldCard({ hold, onRelease, isReleasing }: HoldCardProps) {
-  const isActive = hold.status === 'Active';
+  // WHY: use countdown hook directly so we can react to expiry inline.
+  // When isExpired flips true, we optimistically render the card as Expired
+  // even before the backend worker sweeps (up to 60 s gap). This prevents the
+  // confusing state where 00:00 is shown with an Active badge + Release button.
+  const countdown = useCountdown(hold.expiresAtUtc);
+
+  // Optimistic status: if the API says Active but the clock has run out,
+  // treat it as Expired so the UI is immediately correct.
+  const isApiActive = hold.status === 'Active';
+  const isOptimisticallyExpired = isApiActive && countdown.isExpired;
+  const effectiveStatus = isOptimisticallyExpired ? 'Expired' : hold.status;
+  const isActive = isApiActive && !countdown.isExpired;
 
   return (
-    <article className={`hold-card ${hold.status}`}>
+    <article className={`hold-card ${effectiveStatus}`}>
       <div className="hold-card-header">
         <span className="hold-id" title={hold.holdId}>
           {hold.holdId}
         </span>
-        <StatusBadge status={hold.status} />
+        <StatusBadge status={effectiveStatus} />
       </div>
 
       <div className="hold-card-body">
@@ -81,7 +92,7 @@ function HoldCard({ hold, onRelease, isReleasing }: HoldCardProps) {
 
           {!isActive && (
             <div className="timestamp" style={{ textAlign: 'right' }}>
-              Expires {new Date(hold.expiresAtUtc).toLocaleTimeString()}
+              Expired {new Date(hold.expiresAtUtc).toLocaleTimeString()}
             </div>
           )}
 
