@@ -14,6 +14,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- Allow unit tests to access internal members (e.g. HoldService.InventoryCacheKey) -->
+    <InternalsVisibleTo Include="InventoryHold.UnitTests" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\InventoryHold.Contracts\InventoryHold.Contracts.csproj" />
   </ItemGroup>
 
