@@ -25,6 +25,13 @@ public interface IHoldRepository
     Task UpdateStatusAsync(Hold hold, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Returns all holds ordered by status priority (Active first) then by
+    /// <c>CreatedAtUtc</c> descending. Used by the frontend list endpoint.
+    /// No lazy expiry is applied — use <see cref="GetByIdAsync"/> for that.
+    /// </summary>
+    Task<IReadOnlyList<Hold>> GetAllAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Returns all holds in <see cref="Contracts.HoldStatus.Active"/> state whose
     /// <c>ExpiresAtUtc</c> is before <paramref name="asOf"/>. Used by the background
     /// expiry worker to find holds that need to be transitioned to Expired.

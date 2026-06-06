@@ -22,6 +22,18 @@ public sealed class HoldsController : ControllerBase
         _holdService = holdService;
     }
 
+    /// <summary>
+    /// Returns all holds, ordered Active-first (soonest expiring) then by creation time.
+    /// Used by the frontend holds dashboard. Lazy expiry is not applied on the list.
+    /// </summary>
+    [HttpGet]
+    [ProducesResponseType(typeof(IReadOnlyList<HoldResponse>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetAllHolds(CancellationToken cancellationToken)
+    {
+        var holds = await _holdService.GetAllHoldsAsync(cancellationToken);
+        return Ok(holds.Select(MapToResponse).ToList());
+    }
+
     /// <summary>Places a new hold, reserving the requested items for checkout.</summary>
     /// <param name="request">Product-quantity pairs to reserve.</param>
     /// <param name="cancellationToken">Propagated to all async I/O.</param>

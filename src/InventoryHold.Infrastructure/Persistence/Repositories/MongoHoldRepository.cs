@@ -55,6 +55,25 @@ internal sealed class MongoHoldRepository : IHoldRepository
     }
 
     /// <inheritdoc/>
+    public async Task<IReadOnlyList<Hold>> GetAllAsync(CancellationToken cancellationToken = default)
+    {
+        // Active holds sorted by ExpiresAtUtc ascending (soonest to expire first),
+        // then all other holds by CreatedAtUtc descending (newest first).
+        // Sorting is done in application code — Mongo sort on a compound discriminated
+        // field would require a more complex aggregation pipeline.
+        var docs = await _collection
+            .Find(_ => true)
+            .SortByDescending(d => d.CreatedAtUtc)
+            .ToListAsync(cancellationToken);
+
+        return docs
+            .OrderBy(d => d.Status == HoldStatus.Active ? 0 : 1)
+            .ThenBy(d => d.Status == HoldStatus.Active ? d.ExpiresAtUtc.Ticks : -d.CreatedAtUtc.Ticks)
+            .Select(ToDomain)
+            .ToList();
+    }
+
+    /// <inheritdoc/>
     public async Task<IReadOnlyList<Hold>> GetExpiredActiveHoldsAsync(
         DateTimeOffset asOf,
         CancellationToken cancellationToken = default)

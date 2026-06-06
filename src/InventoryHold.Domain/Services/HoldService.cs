@@ -138,6 +138,14 @@ public sealed class HoldService
     }
 
     /// <summary>
+    /// Returns all holds ordered by status priority (Active first, soonest-expiring
+    /// first within Active) then by creation time descending.
+    /// Lazy expiry is NOT applied on the list — use <see cref="GetHoldAsync"/> for that.
+    /// </summary>
+    public async Task<IReadOnlyList<Hold>> GetAllHoldsAsync(CancellationToken cancellationToken = default)
+        => await _holdRepository.GetAllAsync(cancellationToken);
+
+    /// <summary>
     /// Retrieves a hold by ID, applying lazy expiry if the hold has passed its
     /// <c>ExpiresAtUtc</c> but the background worker has not yet swept it.
     /// </summary>

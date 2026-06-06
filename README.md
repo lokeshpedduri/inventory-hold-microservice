@@ -144,6 +144,26 @@ A MongoDB TTL index was explicitly rejected because it physically deletes the do
 
 ---
 
+## Frontend (local dev)
+
+```bash
+cd frontend
+npm install
+npm run dev     # http://localhost:5173
+```
+
+The Vite dev server proxies `/api/*` → `http://localhost:8080`, so start the backend stack first (`docker-compose up`) then run the frontend separately. No CORS configuration needed.
+
+| Screen | Description |
+|---|---|
+| **Inventory** | Live grid of all products with available-quantity counts; auto-refreshes every 30 s |
+| **New Hold** | Product stepper form; quantity guard prevents requesting more than available; submitting invalidates both the inventory and holds queries |
+| **Holds** | Full holds list ordered Active-first; per-second countdown timer per active hold (amber < 2 min, red < 30 s); Release button with confirmation dialog |
+
+**Font pairing:** Space Grotesk (UI) + JetBrains Mono (data/numbers/IDs/countdowns).
+
+---
+
 ## Running tests
 
 ```bash
